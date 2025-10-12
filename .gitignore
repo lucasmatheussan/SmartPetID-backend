@@ -1,0 +1,32 @@
+# Arquivos e pastas a serem ignorados no backend
+
+# Uploads (arquivos enviados/imagens)
+uploads/
+
+# Logs
+app.log
+*.log
+logs/
+
+# Ambiente/Segredos
+.env
+.env.*
+
+# Virtual env
+venv/
+.venv/
+
+# Caches e compilados Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.coverage
+.cache/
+
+# Arquivos do sistema
+.DS_Store
+
+# Banco de dados local (SQLite)
+pet_biometric.db
