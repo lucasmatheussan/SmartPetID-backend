@@ -1,4 +1,4 @@
-# Pet Biometric Identification MVP
+# SmartPet ID Biometric Identification MVP
 
 Sistema de identificação biométrica de pets usando CLIP (Computer Vision) para reconhecimento facial/focinho.
 
