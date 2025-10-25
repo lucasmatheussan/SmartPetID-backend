@@ -15,12 +15,18 @@ DATABASE_URL = os.getenv(
 )
 
 # Exemplos para produção:
-# MySQL: "mysql+pymysql://user:password@host:port/database"
+# MySQL: "mysql+pymysql://user:password@host:port/database?charset=utf8mb4"
 # PostgreSQL: "postgresql://user:password@host:port/database"
+
+# Configurações de engine compatíveis com MySQL
+is_sqlite = DATABASE_URL.startswith("sqlite")
+is_mysql = DATABASE_URL.startswith("mysql")
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    connect_args={"check_same_thread": False} if is_sqlite else {},
+    pool_pre_ping=True,               # Evita conexões mortas em MySQL
+    pool_recycle=1800                 # Recicla conexões antigas (30 min)
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -9,7 +9,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
@@ -24,7 +24,7 @@ class User(Base):
 class Pet(Base):
     __tablename__ = "pets"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(100), nullable=False)
     species = Column(String(20), nullable=False)  # "dog" ou "cat"
     breed = Column(String(100), nullable=True)
@@ -37,7 +37,7 @@ class Pet(Base):
     biometric_confidence = Column(Float, nullable=True)
     
     # Relacionamento com usuário
-    owner_id = Column(String, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="pets")
     
     # Relacionamento com imagens
@@ -59,10 +59,10 @@ class Pet(Base):
 class IdentificationLog(Base):
     __tablename__ = "identification_logs"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Resultado da identificação
-    identified_pet_id = Column(String, ForeignKey("pets.id"), nullable=True)
+    identified_pet_id = Column(String(36), ForeignKey("pets.id"), nullable=True)
     confidence_score = Column(Float, nullable=False)
     match_found = Column(Boolean, nullable=False)
     
@@ -71,7 +71,7 @@ class IdentificationLog(Base):
     query_timestamp = Column(DateTime, default=datetime.utcnow)
     
     # Dados opcionais do usuário que fez a consulta
-    query_user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    query_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     
     # Localização da consulta (opcional)
     query_latitude = Column(Float, nullable=True)
@@ -84,14 +84,14 @@ class IdentificationLog(Base):
 class LostPetReport(Base):
     __tablename__ = "lost_pet_reports"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Pet relacionado
-    pet_id = Column(String, ForeignKey("pets.id"), nullable=False)
+    pet_id = Column(String(36), ForeignKey("pets.id"), nullable=False)
     pet = relationship("Pet")
     
     # Dados do relato
-    reported_by_user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    reported_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     reported_by = relationship("User")
     
     report_date = Column(DateTime, default=datetime.utcnow)
@@ -112,10 +112,10 @@ class LostPetReport(Base):
 class PetImage(Base):
     __tablename__ = "pet_images"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Pet relacionado
-    pet_id = Column(String, ForeignKey("pets.id"), nullable=False)
+    pet_id = Column(String(36), ForeignKey("pets.id"), nullable=False)
     pet = relationship("Pet", back_populates="images")
     
     # Dados da imagem
@@ -131,7 +131,7 @@ class PetImage(Base):
     # Metadados
     is_primary = Column(Boolean, default=False)  # Imagem principal do pet
     upload_date = Column(DateTime, default=datetime.utcnow)
-    uploaded_by_user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    uploaded_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     uploaded_by = relationship("User")
     
     # Qualidade da imagem para identificação

@@ -120,12 +120,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @app.get("/")
 async def root():
-    return {"message": "Pet Biometric Identification API", "version": "1.0.0"}
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint para Railway"""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}"status": "running"}
+    return {"message": "Pet Biometric Identification API", "status": "running"}
 
 @app.post("/auth/register")
 async def register_user(user_data: UserRegistration, db=Depends(get_db)):
@@ -260,7 +255,7 @@ async def reset_password(reset_data: PasswordReset, db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/auth/me")
-async def get_current_user_info(current_user: int = Depends(get_current_user), db=Depends(get_db)):
+async def get_current_user_info(current_user: str = Depends(get_current_user), db=Depends(get_db)):
     """Retorna informações do usuário atual baseado no token"""
     try:
         user = db.query(User).filter(User.id == current_user).first()
@@ -428,9 +423,9 @@ async def register_pet(
 
 @app.post("/pets/{pet_id}/add-images")
 async def add_pet_images(
-    pet_id: int,
+    pet_id: str,
     images: List[UploadFile] = File(...),
-    current_user: int = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Adiciona novas imagens a um pet já registrado"""
@@ -514,8 +509,8 @@ async def add_pet_images(
 
 @app.get("/pets/{pet_id}/analysis")
 async def analyze_pet_identification(
-    pet_id: int,
-    current_user: int = Depends(get_current_user),
+    pet_id: str,
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Analisa a qualidade das imagens e estratégia de identificação de um pet"""
@@ -573,7 +568,7 @@ async def analyze_pet_identification(
 
 @app.get("/system/analysis")
 async def analyze_system_performance(
-    current_user: int = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Analisa o desempenho geral do sistema de identificação"""
@@ -747,7 +742,7 @@ async def register_pet_test(
 async def identify_pet(
     image: UploadFile = File(...),
     species: str = Form("auto"),  # "dog", "cat" ou "auto"
-    current_user: int = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
     """Identifica um pet através de sua imagem biométrica"""
@@ -865,7 +860,7 @@ async def get_user_pets(
 
 @app.get("/pets")
 async def get_all_pets(
-    current_user: int = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
     """Retorna lista de todos os pets cadastrados"""
@@ -911,7 +906,7 @@ async def get_all_pets(
 @app.get("/pets/{pet_id}")
 async def get_pet_details(
     pet_id: str,
-    current_user: int = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
     """Retorna detalhes de um pet específico com suas imagens"""

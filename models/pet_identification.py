@@ -556,7 +556,7 @@ class PetIdentificationService:
             print(f"Erro na análise de qualidade: {e}")
             return {'overall': 0.5, 'resolution': 0.5, 'sharpness': 0.5, 'contrast': 0.5, 'brightness': 0.5}
     
-    def get_identification_strategy_recommendation(self, db: Session, pet_id: int = None) -> Dict[str, Any]:
+    def get_identification_strategy_recommendation(self, db: Session, pet_id: str = None) -> Dict[str, Any]:
         """
         Recomenda a melhor estratégia de identificação baseada nas imagens disponíveis
         """
