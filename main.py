@@ -35,6 +35,7 @@ app = FastAPI(
 )
 
 # Configurar arquivos estáticos
+os.makedirs("uploads/pets", exist_ok=True)
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 # Middleware para capturar exceções
@@ -109,6 +110,12 @@ class IdentificationResult(BaseModel):
     status: Optional[str] = None
     match_found: bool
     images: Optional[List[dict]] = None  # URLs das imagens do pet
+
+class QrCodeData(BaseModel):
+    qr_content: str
+    deep_link_url: str
+    pet_id: str
+    pet_name: Optional[str] = None
 
 # Dependência de autenticação
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -222,6 +229,36 @@ async def request_password_reset(reset_request: PasswordResetRequest, db=Depends
             "note": "Em produção, este token seria enviado por email"
         }
     
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/pets/{pet_id}/qrcode-data", response_model=QrCodeData)
+async def get_pet_qrcode_data(
+    pet_id: str,
+    request: Request,
+    current_user: str = Depends(get_current_user),
+    db=Depends(get_db)
+):
+    try:
+        pet = db.query(Pet).filter(Pet.id == pet_id).first()
+        if not pet:
+            raise HTTPException(status_code=404, detail="Pet não encontrado")
+
+        base_url = str(request.base_url)
+        if not base_url.endswith("/"):
+            base_url += "/"
+
+        deep_link_url = f"{base_url}pets/{pet_id}"
+        qr_content = f"focinhoid:pet:{pet_id}"
+
+        return QrCodeData(
+            qr_content=qr_content,
+            deep_link_url=deep_link_url,
+            pet_id=str(pet.id),
+            pet_name=pet.name,
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
