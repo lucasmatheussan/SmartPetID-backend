@@ -117,6 +117,12 @@ class QrCodeData(BaseModel):
     pet_id: str
     pet_name: Optional[str] = None
 
+class RfcData(BaseModel):
+    ndef_text: str
+    deep_link_url: str
+    pet_id: str
+    pet_name: Optional[str] = None
+
 # Dependência de autenticação
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
@@ -253,6 +259,36 @@ async def get_pet_qrcode_data(
 
         return QrCodeData(
             qr_content=qr_content,
+            deep_link_url=deep_link_url,
+            pet_id=str(pet.id),
+            pet_name=pet.name,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/pets/{pet_id}/rfc-data", response_model=RfcData)
+async def get_pet_rfc_data(
+    pet_id: str,
+    request: Request,
+    current_user: str = Depends(get_current_user),
+    db=Depends(get_db)
+):
+    try:
+        pet = db.query(Pet).filter(Pet.id == pet_id).first()
+        if not pet:
+            raise HTTPException(status_code=404, detail="Pet não encontrado")
+
+        base_url = str(request.base_url)
+        if not base_url.endswith("/"):
+            base_url += "/"
+
+        deep_link_url = f"{base_url}pets/{pet_id}"
+        ndef_text = f"focinhoid:pet:{pet_id}"
+
+        return RfcData(
+            ndef_text=ndef_text,
             deep_link_url=deep_link_url,
             pet_id=str(pet.id),
             pet_name=pet.name,
