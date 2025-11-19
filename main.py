@@ -833,6 +833,7 @@ async def register_pet_test(
 async def identify_pet(
     image: UploadFile = File(...),
     species: str = Form("auto"),  # "dog", "cat" ou "auto"
+    request: Request,
     current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
@@ -875,11 +876,14 @@ async def identify_pet(
             # Buscar imagens do pet
             pet_images = db.query(PetImage).filter(PetImage.pet_id == best_match["pet_id"]).all()
             images_list = []
+            base_url = str(request.base_url)
+            if not base_url.endswith("/"):
+                base_url += "/"
             for img in pet_images:
                 images_list.append({
                     "id": img.id,
                     "filename": img.filename,
-                    "url": f"http://192.168.1.184:8000/static/pets/{best_match['pet_id']}/{img.filename}",
+                    "url": f"{base_url}static/pets/{best_match['pet_id']}/{img.filename}",
                     "is_primary": img.is_primary,
                     "quality_score": img.quality_score
                 })
@@ -951,6 +955,7 @@ async def get_user_pets(
 
 @app.get("/pets")
 async def get_all_pets(
+    request: Request,
     current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
@@ -963,6 +968,9 @@ async def get_all_pets(
             # Buscar imagens do pet
             images = db.query(PetImage).filter(PetImage.pet_id == pet.id).all()
             
+            base_url = str(request.base_url)
+            if not base_url.endswith("/"):
+                base_url += "/"
             pet_data = {
                 "id": pet.id,
                 "name": pet.name,
@@ -980,7 +988,7 @@ async def get_all_pets(
                         "file_path": img.file_path,
                         "quality_score": img.quality_score,
                         "is_primary": img.is_primary,
-                        "url": f"http://192.168.1.184:8000/static/pets/{pet.id}/{img.filename}"
+                        "url": f"{base_url}static/pets/{pet.id}/{img.filename}"
                     }
                     for img in images
                 ]
@@ -997,6 +1005,7 @@ async def get_all_pets(
 @app.get("/pets/{pet_id}")
 async def get_pet_details(
     pet_id: str,
+    request: Request,
     current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
@@ -1012,6 +1021,9 @@ async def get_pet_details(
         
         # Construir lista de imagens
         images_list = []
+        base_url = str(request.base_url)
+        if not base_url.endswith("/"):
+            base_url += "/"
         for img in images:
             images_list.append({
                 "id": img.id,
@@ -1019,7 +1031,7 @@ async def get_pet_details(
                 "file_path": img.file_path,
                 "quality_score": img.quality_score,
                 "is_primary": img.is_primary,
-                "url": f"http://192.168.1.184:8000/static/pets/{pet.id}/{img.filename}"
+                "url": f"{base_url}static/pets/{pet.id}/{img.filename}"
             })
         
         return {
