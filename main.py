@@ -117,7 +117,7 @@ class QrCodeData(BaseModel):
     pet_id: str
     pet_name: Optional[str] = None
 
-class RfcData(BaseModel):
+class RfidData(BaseModel):
     ndef_text: str
     deep_link_url: str
     pet_id: str
@@ -268,8 +268,8 @@ async def get_pet_qrcode_data(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/pets/{pet_id}/rfc-data", response_model=RfcData)
-async def get_pet_rfc_data(
+@app.get("/pets/{pet_id}/rfid-data", response_model=RfidData)
+async def get_pet_rfid_data(
     pet_id: str,
     request: Request,
     current_user: str = Depends(get_current_user),
@@ -287,7 +287,7 @@ async def get_pet_rfc_data(
         deep_link_url = f"{base_url}pets/{pet_id}"
         ndef_text = f"focinhoid:pet:{pet_id}"
 
-        return RfcData(
+        return RfidData(
             ndef_text=ndef_text,
             deep_link_url=deep_link_url,
             pet_id=str(pet.id),

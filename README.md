@@ -1,82 +1,80 @@
-# SmartPet ID Biometric Identification MVP
+# SmartPet ID • Backend (FastAPI)
 
-Sistema de identificação biométrica de pets usando CLIP (Computer Vision) para reconhecimento facial/focinho.
+API para identificação biométrica de pets (face/focinho) com CLIP, autenticação JWT, upload de imagens e integrações de QR/RFID.
 
-## 🚀 Setup Rápido
+## Pré‑requisitos
+- Python 3.9+
+- Pip
+- macOS/Linux/Windows
 
-### 1. Instalar Dependências
+## Instalação
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
 
-### 2. Inicializar Banco de Dados
+## Variáveis de ambiente
+Crie um arquivo `.env` (opcional):
+```
+SECRET_KEY=troque-este-segredo-em-producao
+DATABASE_URL=sqlite:///./pet_biometric.db
+```
+
+## Banco de dados
+Inicializar tabelas:
+```bash
+python3 init_db.py
+```
+ou:
 ```bash
 python3 create_db.py
 ```
 
-### 3. Iniciar Servidor
+Criar usuário administrador de teste:
 ```bash
-python3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8001
+python3 create_admin.py
 ```
+Credenciais exibidas no terminal (padrão: usuário `superadmin`, senha `admin123`).
 
-### 4. Acessar API
-- **Documentação**: http://localhost:8001/docs
-- **API Base**: http://localhost:8001
-
-## 📋 Endpoints Principais
-
-### Identificação de Pet
+## Execução
+Iniciar servidor (porta 8000):
 ```bash
-curl -X POST "http://localhost:8001/pets/identify" \
-  -H "Content-Type: multipart/form-data" \
+python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
+```
+Documentação: `http://localhost:8000/docs`
+
+Uploads locais: criados em `uploads/pets/<id>/` (servidos em `http://localhost:8000/static/pets/<id>/<arquivo>`).
+
+## Autenticação
+- Registro: `POST /auth/register`
+- Login: `POST /auth/login` → retorna `access_token`
+- Headers nas rotas protegidas: `Authorization: Bearer <token>`
+
+## Endpoints principais
+- Registrar pet (com imagens, autenticado): `POST /pets/register`
+- Adicionar imagens: `POST /pets/{pet_id}/add-images`
+- Identificar pet por imagem: `POST /pets/identify`
+- Listar pets: `GET /pets`
+- Detalhes do pet: `GET /pets/{pet_id}`
+- QR do pet (conteúdo/deep link): `GET /pets/{pet_id}/qrcode-data`
+- RFID do pet (NDEF texto/deep link): `GET /pets/{pet_id}/rfid-data`
+
+### Exemplos (curl)
+Identificar pet:
+```bash
+curl -X POST "http://localhost:8000/pets/identify" \
+  -H "Authorization: Bearer <TOKEN>" \
   -F "image=@sua_imagem.jpg" \
   -F "species=auto"
 ```
 
-### Registro de Pet (Teste)
+Registrar pet (teste, sem auth):
 ```bash
-curl -X POST "http://localhost:8001/pets/register-test" \
-  -H "Content-Type: multipart/form-data" \
-  -F "name=Rex" \
-  -F "species=dog" \
-  -F "breed=Golden Retriever" \
-  -F "age=3" \
-  -F "description=Cachorro amigável" \
-  -F "owner_contact=test@example.com" \
+curl -X POST "http://localhost:8000/pets/register-test" \
+  -F "name=Rex" -F "species=dog" -F "owner_contact=test@example.com" \
   -F "image=@imagem_do_pet.jpg"
 ```
 
-## 🔧 Tecnologias
-
-- **Backend**: FastAPI + Python 3.9+
-- **IA**: OpenAI CLIP (ViT-B/32)
-- **Banco**: SQLite (desenvolvimento)
-- **Embeddings**: 512 dimensões (CLIP nativo)
-
-## 📊 Status do Sistema
-
-✅ **Funcionando**:
-- Extração de embeddings com CLIP
-- Identificação de pets (retorna 200 OK)
-- Banco de dados SQLite
-- API endpoints básicos
-
-⚠️ **Limitações Atuais**:
-- Endpoint de registro com autenticação tem problemas
-- Usar `/pets/register-test` para testes
-- Banco vazio inicialmente (sem pets pré-cadastrados)
-
-## 🧪 Teste Rápido
-
-1. Coloque uma imagem de teste como `test_image.png` no diretório backend
-2. Execute o comando de identificação acima
-3. Deve retornar: `{"match_found": false}` (normal, banco vazio)
-
-## 📝 Próximos Passos
-
-1. Corrigir endpoint de registro com autenticação
-2. Adicionar pets de exemplo no banco
-3. Implementar interface Flutter
-4. Otimizar threshold de similaridade
-5. Deploy em produção
+## Observações
+- Em desenvolvimento, use `SECRET_KEY` forte e troque em produção.
+- Para iOS NFC/RFID no app, é necessário provisionamento com capacidade “Near Field Communication Tag Reading”.
