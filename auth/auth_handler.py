@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class AuthHandler:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    pwd_context = CryptContext(schemes=["bcrypt_sha256", "bcrypt"], deprecated="auto")
     secret_key = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
     algorithm = "HS256"
     access_token_expire_minutes = 30 * 24 * 60  # 30 dias
