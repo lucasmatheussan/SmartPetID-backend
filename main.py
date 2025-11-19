@@ -831,9 +831,9 @@ async def register_pet_test(
 
 @app.post("/pets/identify")
 async def identify_pet(
+    request: Request,
     image: UploadFile = File(...),
     species: str = Form("auto"),  # "dog", "cat" ou "auto"
-    request: Request,
     current_user: str = Depends(get_current_user),
     db=Depends(get_db)
 ):
